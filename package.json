@@ -1,5 +1,5 @@
 {
-  "name": "@trakli/ui-kit",
+  "name": "@trakli/design",
   "version": "0.0.0",
   "description": "Trakli shared UI primitives, distributed as a Nuxt layer.",
   "type": "module",
