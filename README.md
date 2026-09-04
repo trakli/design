@@ -1,4 +1,4 @@
-# @trakli/ui-kit
+# @trakli/design
 
 Shared Trakli UI primitives, distributed as a Nuxt layer. Consume it straight from GitHub today; npm publishing comes later.
 
@@ -10,7 +10,7 @@ In the host app's `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  extends: ['github:trakli/ui-kit'],
+  extends: ['github:trakli/design'],
 })
 ```
 
