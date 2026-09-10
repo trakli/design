@@ -1,30 +1,34 @@
 <template>
   <TDropdown class="language-selector">
     <template #trigger>
-      <button
-        class="icon-button"
+      <TButton
+        type="button"
+        variant="secondary"
+        :full-width="false"
+        class="language-selector-trigger"
         :aria-label="currentLanguage.name"
         :title="currentLanguage.name"
       >
         <img :src="currentLanguage.flagUrl" :alt="currentLanguage.name" class="flag-icon" />
-      </button>
+      </TButton>
     </template>
 
     <div class="language-dropdown-inner">
       <div class="dropdown-header">
-        <h3>{{ t('Language') }}</h3>
+        <h3>{{ headerTitle || t('Language') }}</h3>
       </div>
+      <TDivider orientation="horizontal" />
       <div class="language-list">
         <TDropdownItem
-          v-for="lang in languages"
+          v-for="lang in availableLanguages"
           :key="lang.code"
           class="language-item"
-          :class="{ active: locale === lang.code }"
+          :class="{ active: currentLocale === lang.code }"
           @click="selectLanguage(lang.code)"
         >
           <img :src="lang.flagUrl" :alt="lang.name" class="flag-icon" />
           <span class="language-name">{{ lang.name }}</span>
-          <Check v-if="locale === lang.code" class="check-icon" />
+          <Check v-if="currentLocale === lang.code" class="check-icon" />
         </TDropdownItem>
       </div>
     </div>
@@ -36,24 +40,65 @@ import { computed } from 'vue';
 import { Check } from 'lucide-vue-next';
 import TDropdown from './TDropdown.vue';
 import TDropdownItem from './TDropdownItem.vue';
+import TButton from './TButton.vue';
+import TDivider from './TDivider.vue';
 
-const { t, locale, setLocale } = useI18n();
+// Bundled static flag imports so consumers don't rely on unbundled host paths
+import flagGb from '../assets/flags/gb.svg';
+import flagFr from '../assets/flags/fr.svg';
+import flagDe from '../assets/flags/de.svg';
+import flagEs from '../assets/flags/es.svg';
+import flagPt from '../assets/flags/pt.svg';
+import flagIt from '../assets/flags/it.svg';
 
-const languages = [
-  { code: 'en', name: 'English', flagUrl: '/flags/gb.svg' },
-  { code: 'fr', name: 'Français', flagUrl: '/flags/fr.svg' },
-  { code: 'de', name: 'Deutsch', flagUrl: '/flags/de.svg' },
-  { code: 'es', name: 'Español', flagUrl: '/flags/es.svg' },
-  { code: 'pt', name: 'Português', flagUrl: '/flags/pt.svg' },
-  { code: 'it', name: 'Italiano', flagUrl: '/flags/it.svg' }
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: undefined
+  },
+  headerTitle: {
+    type: String,
+    default: ''
+  },
+  languages: {
+    type: Array,
+    default: null
+  }
+});
+
+const emit = defineEmits(['update:modelValue', 'select']);
+
+const defaultLanguages = [
+  { code: 'en', name: 'English', flagUrl: flagGb },
+  { code: 'fr', name: 'Français', flagUrl: flagFr },
+  { code: 'de', name: 'Deutsch', flagUrl: flagDe },
+  { code: 'es', name: 'Español', flagUrl: flagEs },
+  { code: 'pt', name: 'Português', flagUrl: flagPt },
+  { code: 'it', name: 'Italiano', flagUrl: flagIt }
 ];
 
+const availableLanguages = computed(() => (props.languages && props.languages.length ? props.languages : defaultLanguages));
+
+// Optional useI18n fallback if available in consumer context
+const i18n = typeof useI18n === 'function' ? useI18n() : null;
+const t = i18n?.t || ((k) => k);
+
+const currentLocale = computed(() => {
+  if (props.modelValue !== undefined) return props.modelValue;
+  if (i18n?.locale?.value) return i18n.locale.value;
+  return 'en';
+});
+
 const currentLanguage = computed(() => {
-  return languages.find((lang) => lang.code === locale.value) || languages[0];
+  return availableLanguages.value.find((lang) => lang.code === currentLocale.value) || availableLanguages.value[0];
 });
 
 const selectLanguage = (code) => {
-  setLocale(code);
+  if (i18n?.setLocale) {
+    i18n.setLocale(code);
+  }
+  emit('update:modelValue', code);
+  emit('select', code);
 };
 </script>
 
@@ -62,6 +107,17 @@ const selectLanguage = (code) => {
 
 .language-selector {
   display: inline-block;
+}
+
+.language-selector-trigger {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
 }
 
 .flag-icon {
@@ -81,7 +137,6 @@ const selectLanguage = (code) => {
 
 .dropdown-header {
   padding: 1rem;
-  border-bottom: 1px solid $border-color;
 
   h3 {
     margin: 0;

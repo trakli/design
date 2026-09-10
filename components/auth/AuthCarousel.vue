@@ -1,38 +1,40 @@
 <template>
   <div class="login-sidebar">
     <div class="sidebar-content">
-      <div class="carousel-slide">
-        <div
-          class="slide-image-wrapper"
-          :class="{ 'slide-image-wrapper--art': slides[currentSlide].image }"
-        >
-          <transition name="fade" mode="out-in">
-            <img
-              v-if="slides[currentSlide].image"
-              :key="`art-${currentSlide}`"
-              :src="slides[currentSlide].image"
-              class="slide-art"
-              alt=""
-            />
-            <component
-              v-else
-              :is="slides[currentSlide].icon"
-              :key="currentSlide"
-              class="slide-icon"
-            />
-          </transition>
-        </div>
-        <div class="sidebar-text">
-          <transition name="fade" mode="out-in">
-            <div v-if="slides[currentSlide]" :key="currentSlide" class="text-content">
-              <h2>{{ slides[currentSlide].title }}</h2>
-              <p>{{ slides[currentSlide].text }}</p>
-            </div>
-          </transition>
-        </div>
+      <div v-if="activeSlides.length" class="carousel-slide">
+        <slot name="slide" :slide="activeSlides[currentSlide]" :index="currentSlide">
+          <div
+            class="slide-image-wrapper"
+            :class="{ 'slide-image-wrapper--art': activeSlides[currentSlide]?.image }"
+          >
+            <transition name="fade" mode="out-in">
+              <img
+                v-if="activeSlides[currentSlide]?.image"
+                :key="`art-${currentSlide}`"
+                :src="activeSlides[currentSlide].image"
+                class="slide-art"
+                alt=""
+              />
+              <component
+                v-else-if="activeSlides[currentSlide]?.icon"
+                :is="activeSlides[currentSlide].icon"
+                :key="currentSlide"
+                class="slide-icon"
+              />
+            </transition>
+          </div>
+          <div class="sidebar-text">
+            <transition name="fade" mode="out-in">
+              <div v-if="activeSlides[currentSlide]" :key="currentSlide" class="text-content">
+                <h2>{{ activeSlides[currentSlide].title }}</h2>
+                <p>{{ activeSlides[currentSlide].text }}</p>
+              </div>
+            </transition>
+          </div>
+        </slot>
         <div class="carousel-dots">
           <span
-            v-for="(slide, index) in slides"
+            v-for="(_, index) in activeSlides"
             :key="index"
             :class="['dot', { active: currentSlide === index }]"
             @click="currentSlide = index"
@@ -45,150 +47,138 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import IconAI from '~icons/solar/magic-stick-3-bold-duotone';
-import IconIntegrations from '~icons/solar/card-transfer-bold-duotone';
-import IconImport from '~icons/solar/import-bold-duotone';
+import { Wand2 as IconAI, ArrowLeftRight as IconIntegrations, Download as IconImport } from 'lucide-vue-next';
+import defaultFloatingMan from '../../assets/floating-docs-man.svg';
 
-const { t } = useI18n();
+const props = defineProps({
+  slides: {
+    type: Array,
+    default: null
+  },
+  interval: {
+    type: Number,
+    default: 5000
+  }
+});
+
+// Optional useI18n fallback if available in consumer context
+const t = typeof useI18n === 'function' ? useI18n().t : (k) => k;
 const currentSlide = ref(0);
 
-const slides = computed(() => [
+const defaultSlides = computed(() => [
   {
-    title: t('carousel.ai.title'),
-    text: t('carousel.ai.text'),
+    title: t('carousel.ai.title') !== 'carousel.ai.title' ? t('carousel.ai.title') : 'Just ask',
+    text: t('carousel.ai.text') !== 'carousel.ai.text' ? t('carousel.ai.text') : 'Log expenses, build reports and get answers by chatting with your assistant in plain language.',
     icon: IconAI
   },
   {
-    title: t('carousel.integrations.title'),
-    text: t('carousel.integrations.text'),
+    title: t('carousel.integrations.title') !== 'carousel.integrations.title' ? t('carousel.integrations.title') : 'Connect your bank',
+    text: t('carousel.integrations.text') !== 'carousel.integrations.text' ? t('carousel.integrations.text') : 'Link accounts with Plaid and import statements, so your transactions flow in on their own.',
     icon: IconIntegrations
   },
   {
-    title: t('carousel.import.title'),
-    text: t('carousel.import.text'),
+    title: t('carousel.import.title') !== 'carousel.import.title' ? t('carousel.import.title') : 'Import anything',
+    text: t('carousel.import.text') !== 'carousel.import.text' ? t('carousel.import.text') : 'Drop in a statement in any format and the assistant reads it, structured or not, into clean transactions.',
     icon: IconImport
   },
   {
-    title: t('carousel.welcome.title'),
-    text: t('carousel.welcome.text'),
-    image: '/floating-docs-man.svg'
+    title: t('carousel.welcome.title') !== 'carousel.welcome.title' ? t('carousel.welcome.title') : "Sit back, we've got this",
+    text: t('carousel.welcome.text') !== 'carousel.welcome.text' ? t('carousel.welcome.text') : 'You handle life. Trakli wrangles the receipts, the math and the mess. Welcome aboard!',
+    image: defaultFloatingMan
   }
 ]);
+
+const activeSlides = computed(() => (props.slides && props.slides.length ? props.slides : defaultSlides.value));
 
 let slideInterval;
 
 const startSlideShow = () => {
+  if (props.interval <= 0) return;
   slideInterval = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % slides.value.length;
-  }, 5000);
+    if (activeSlides.value.length) {
+      currentSlide.value = (currentSlide.value + 1) % activeSlides.value.length;
+    }
+  }, props.interval);
 };
 
 onMounted(startSlideShow);
 onBeforeUnmount(() => clearInterval(slideInterval));
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @use '../../assets/scss/_vars.scss' as *;
 
 .login-sidebar {
-  flex: 1;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 2rem 3rem;
-  min-width: 480px;
-  color: white;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 40px;
 }
 
 .sidebar-content {
-  width: 100%;
-  max-width: 600px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 2.5rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
 }
 
 .carousel-slide {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
   align-items: center;
-  justify-content: center;
   width: 100%;
 }
 
 .slide-image-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto;
-  border-radius: 40px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.4);
+  align-items: center;
+  width: 100%;
+  height: 240px;
+  margin-bottom: 32px;
 
   &--art {
-    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.16), transparent 65%);
-    border: none;
-    box-shadow: none;
-    width: 280px;
-    height: 240px;
+    height: 260px;
   }
 }
 
 .slide-icon {
-  width: 120px;
-  height: 120px;
-  color: #fff;
+  width: 140px;
+  height: 140px;
+  color: $primary;
 }
 
 .slide-art {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  transform-origin: 50% 90%;
-  animation: funky-bob 3.6s ease-in-out infinite;
-}
-
-@keyframes funky-bob {
-  0%   { transform: translateY(0) rotate(-4deg) scale(1); }
-  30%  { transform: translateY(-16px) rotate(3deg) scale(1.03); }
-  55%  { transform: translateY(-6px) rotate(-2deg) scale(1); }
-  80%  { transform: translateY(-12px) rotate(4deg) scale(1.02); }
-  100% { transform: translateY(0) rotate(-4deg) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .slide-art { animation: none; }
 }
 
 .sidebar-text {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 200px;
-  text-align: center;
+  min-height: 110px;
+  margin-bottom: 24px;
+  width: 100%;
 
   .text-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 90%;
-
     h2 {
-      font-size: 2.75rem;
+      font-size: 22px;
       font-weight: 700;
-      color: $accent-color;
-      margin: 0;
-      line-height: 1.1;
+      color: $text-primary;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
     }
 
     p {
-      font-size: 1.125rem;
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.55;
+      color: $text-muted;
       margin: 0;
     }
   }
@@ -196,30 +186,41 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 
 .carousel-dots {
   display: flex;
+  gap: 8px;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 10px;
-}
+  align-items: center;
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: background-color 0.3s;
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(var(--color-primary-rgb), 0.2);
+    cursor: pointer;
+    transition: all 0.25s ease;
 
-  &.active {
-    background-color: $accent-color;
+    &.active {
+      width: 24px;
+      background-color: $primary;
+    }
+
+    &:hover:not(.active) {
+      background-color: rgba(var(--color-primary-rgb), 0.4);
+    }
   }
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.fade-enter-from,
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 .fade-leave-to {
   opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

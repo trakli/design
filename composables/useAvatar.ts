@@ -1,18 +1,22 @@
-// @ts-nocheck — dicebear collection types are loose; runtime verified
 import { createAvatar } from '@dicebear/core';
 import { personas } from '@dicebear/collection';
 
+export interface AvatarUser {
+  email?: string;
+  id?: number | string;
+  avatar_url?: string;
+}
+
 /**
- * Avatar helper — Tier 0 primitive
- * Migrated from webui/composables/useAvatar.ts
+ * Avatar helper.
  * Generates deterministic fallback SVG via @dicebear/personas.
  */
 export const useAvatar = () => {
-  const generateFallbackAvatar = (user: { email?: string; id?: number }): string => {
+  const generateFallbackAvatar = (user: AvatarUser): string => {
     if (!user) return '';
 
     // Use personas style for gender-neutral people avatars
-    const avatar = createAvatar(personas, {
+    const avatar = createAvatar(personas as any, {
       seed: user.email || user.id?.toString() || 'fallback',
       backgroundColor: [
         'b6e3f4',
@@ -36,8 +40,7 @@ export const useAvatar = () => {
     return avatar.toDataUri();
   };
 
-  const getAvatarUrl = (user: { email?: string; id?: number; avatar_url?: string }): string => {
-    // Return the user's avatar_url if it exists, otherwise generate a fallback
+  const getAvatarUrl = (user: AvatarUser): string => {
     return user?.avatar_url || generateFallbackAvatar(user);
   };
 

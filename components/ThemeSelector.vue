@@ -1,15 +1,23 @@
 <template>
   <TDropdown class="theme-selector">
     <template #trigger>
-      <button class="icon-button" :aria-label="t('Theme')" :title="t('Theme')">
+      <TButton
+        type="button"
+        variant="secondary"
+        :full-width="false"
+        class="theme-selector-trigger"
+        :aria-label="t('Theme')"
+        :title="t('Theme')"
+      >
         <component :is="triggerIcon" class="icon" />
-      </button>
+      </TButton>
     </template>
 
     <div class="theme-dropdown-inner">
       <div class="dropdown-header">
         <h3>{{ t('Theme') }}</h3>
       </div>
+      <TDivider orientation="horizontal" />
       <div class="theme-list">
         <TDropdownItem
           v-for="option in options"
@@ -32,6 +40,8 @@ import { computed } from 'vue';
 import { Sun, Moon, Monitor, Check } from 'lucide-vue-next';
 import TDropdown from './TDropdown.vue';
 import TDropdownItem from './TDropdownItem.vue';
+import TButton from './TButton.vue';
+import TDivider from './TDivider.vue';
 import { useTheme, type ThemeMode } from '../composables/useTheme';
 
 const { t } = useI18n();
@@ -60,9 +70,20 @@ const selectTheme = (value: ThemeMode) => {
   display: inline-block;
 }
 
+.theme-selector-trigger {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
+}
+
 .icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: currentColor;
 }
 
@@ -76,7 +97,6 @@ const selectTheme = (value: ThemeMode) => {
 
 .dropdown-header {
   padding: 1rem;
-  border-bottom: 1px solid $border-color;
 
   h3 {
     margin: 0;
