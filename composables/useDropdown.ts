@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, type Ref } from 'vue';
 /**
  * A small composable that models an open/closed dropdown anchored to a
  * root element. Handles click-outside to close and Escape to close.
+ * Migrated from webui/composables/useDropdown.ts — Tier 0 primitive (#9)
  * Zero domain deps; pure DOM event handling.
  *
  * Usage:

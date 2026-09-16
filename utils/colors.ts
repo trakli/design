@@ -1,5 +1,6 @@
 /**
- * Dynamic color generation utilities for consistent UI theming.
+ * Dynamic color generation utilities for consistent UI theming
+ * Migrated from webui/utils/colors.ts — Tier 0 primitive (#7)
  * Zero domain deps; pure algorithm + constants.
  */
 

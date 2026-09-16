@@ -30,12 +30,7 @@
 
     <div v-if="!isLoading && !error && !hasData && showEmpty" class="empty-state">
       <slot name="empty">
-        <EmptyState
-          :title="emptyTitle || undefined"
-          :description="emptySubtitle || undefined"
-          :action-label="emptyButtonLabel || undefined"
-          @create="$emit('create')"
-        />
+        <EmptyState :page-name="emptyStateName" :title="emptyTitle" :subtitle="emptySubtitle" :button-label="emptyButtonLabel" @create="$emit('create')" />
       </slot>
     </div>
 
@@ -121,7 +116,7 @@ const props = defineProps({
 
 defineEmits(['create']);
 
-// Default error extraction fallback helper
+// Default error extraction (mirrors webui/utils/apiErrors.ts)
 function defaultExtractApiErrors(err) {
   if (typeof err === 'string') return err;
   if (err?.response?._data?.message) return err.response._data.message;
