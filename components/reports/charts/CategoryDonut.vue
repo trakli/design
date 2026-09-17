@@ -89,7 +89,7 @@ const onLeave = () => {
 </script>
 
 <style lang="scss" scoped>
-@use '../../assets/scss/_vars.scss' as *;
+@use '../../../assets/scss/_vars.scss' as *;
 
 .donut-wrap {
   display: grid;
