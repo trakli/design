@@ -359,13 +359,13 @@
 | [x] | **ChatTableBlock** | [ai/blocks/ChatTableBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatTableBlock.vue) | Renders tabular AI result data inline in chat. |
 | [x] | **ChatKpiBlock** | [ai/blocks/ChatKpiBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatKpiBlock.vue) | Renders KPI metrics returned by AI inline in chat. |
 | [x] | **ChatListBlock** | [ai/blocks/ChatListBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatListBlock.vue) | Renders AI list responses inline in chat. |
-| [ ] | **ChatTimelineBlock** | [ai/blocks/ChatTimelineBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatTimelineBlock.vue) | Renders timeline/event-sequence AI results inline. |
+| [x] | **ChatTimelineBlock** | [ai/blocks/ChatTimelineBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatTimelineBlock.vue) | Renders timeline/event-sequence AI results inline. |
 | [x] | **ChatComparisonBlock** | [ai/blocks/ChatComparisonBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatComparisonBlock.vue) | Side-by-side comparison result block from AI. |
 | [x] | **ChatCalloutBlock** | [ai/blocks/ChatCalloutBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatCalloutBlock.vue) | Styled callout/alert block from AI (tip, warning, info). |
 | [x] | **ChatProgressBlock** | [ai/blocks/ChatProgressBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatProgressBlock.vue) | Progress steps block shown as part of AI structured response. |
-| [ ] | **ChatQuestionBlock** | [ai/blocks/ChatQuestionBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatQuestionBlock.vue) | AI clarification question block with interactive answer options. |
-| [ ] | **ChatProposedActionBlock** | [ai/blocks/ChatProposedActionBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatProposedActionBlock.vue) | AI-proposed action with accept/reject confirmation UI. |
-| [ ] | **ChatQuickActionsBlock** | [ai/blocks/ChatQuickActionsBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatQuickActionsBlock.vue) | Pill-style quick action suggestion chips from AI. |
+| [x] | **ChatQuestionBlock** | [ai/blocks/ChatQuestionBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatQuestionBlock.vue) | AI clarification question block with interactive answer options. |
+| [x] | **ChatProposedActionBlock** | [ai/blocks/ChatProposedActionBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatProposedActionBlock.vue) | AI-proposed action with accept/reject confirmation UI. |
+| [x] | **ChatQuickActionsBlock** | [ai/blocks/ChatQuickActionsBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatQuickActionsBlock.vue) | Pill-style quick action suggestion chips from AI. |
 | [x] | **ChatImportReviewBlock** | [ai/blocks/ChatImportReviewBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatImportReviewBlock.vue) | AI import review result rendered inline with accept/edit flow. |
 | [x] | **ChatCanvasBlock** | [ai/blocks/ChatCanvasBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatCanvasBlock.vue) | Triggers canvas panel with AI-generated visual artifact payload. |
 
