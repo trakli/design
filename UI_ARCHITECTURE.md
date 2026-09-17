@@ -345,15 +345,15 @@
 | Status | Component | File | Description |
 | :---: | :--- | :--- | :--- |
 | [ ] | **ChatExperience** | [ai/ChatExperience.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatExperience.vue) | Full AI chat experience shell composing sidebar, message list, composer, and canvas panel. |
-| [ ] | **ChatComposer** | [ai/ChatComposer.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatComposer.vue) | Message input bar with attach, send, and slash-command detection. |
-| [ ] | **ChatMessageList** | [ai/ChatMessageList.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatMessageList.vue) | Scrollable message thread with user/assistant message rendering. |
-| [ ] | **ChatSidebar** | [ai/ChatSidebar.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatSidebar.vue) | Conversation history sidebar with new chat, session list, and rename/delete. |
-| [ ] | **ChatResultRenderer** | [ai/ChatResultRenderer.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatResultRenderer.vue) | Routes AI result payloads to the appropriate block renderer component. |
-| [ ] | **CanvasPanel** | [ai/CanvasPanel.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/CanvasPanel.vue) | Expandable side canvas panel for AI-generated chart/table artifacts. |
+| [x] | **ChatComposer** | [ai/ChatComposer.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatComposer.vue) | Message input bar with attach, send, and slash-command detection. |
+| [x] | **ChatMessageList** | [ai/ChatMessageList.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatMessageList.vue) | Scrollable message thread with user/assistant message rendering. |
+| [x] | **ChatSidebar** | [ai/ChatSidebar.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatSidebar.vue) | Conversation history sidebar with new chat, session list, and rename/delete. |
+| [x] | **ChatResultRenderer** | [ai/ChatResultRenderer.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatResultRenderer.vue) | Routes AI result payloads to the appropriate block renderer component. |
+| [x] | **CanvasPanel** | [ai/CanvasPanel.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/CanvasPanel.vue) | Expandable side canvas panel for AI-generated chart/table artifacts. |
 | [ ] | **ChatLandingInsights** | [ai/ChatLandingInsights.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatLandingInsights.vue) | Landing state insight prompt cards shown before first message. |
-| [ ] | **ChatEmptyState** | [ai/ChatEmptyState.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatEmptyState.vue) | Empty chat session landing with suggested prompts. |
-| [ ] | **ChatProgressSteps** | [ai/ChatProgressSteps.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatProgressSteps.vue) | Animated multi-step progress indicator for long-running AI operations. |
-| [ ] | **DiscussionDropdown** | [ai/DiscussionDropdown.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/DiscussionDropdown.vue) | Conversation session selection and management dropdown. |
+| [x] | **ChatEmptyState** | [ai/ChatEmptyState.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatEmptyState.vue) | Empty chat session landing with suggested prompts. |
+| [x] | **ChatProgressSteps** | [ai/ChatProgressSteps.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/ChatProgressSteps.vue) | Animated multi-step progress indicator for long-running AI operations. |
+| [x] | **DiscussionDropdown** | [ai/DiscussionDropdown.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/DiscussionDropdown.vue) | Conversation session selection and management dropdown. |
 | [x] | **ChatMarkdownBlock** | [ai/blocks/ChatMarkdownBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatMarkdownBlock.vue) | Renders AI markdown response safely via `useMarkdown`. |
 | [x] | **ChatChartBlock** | [ai/blocks/ChatChartBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatChartBlock.vue) | Renders AI-generated chart data inline in chat. |
 | [x] | **ChatTableBlock** | [ai/blocks/ChatTableBlock.vue](file:///home/lantum/Desktop/Projects/webui/components/ai/blocks/ChatTableBlock.vue) | Renders tabular AI result data inline in chat. |
