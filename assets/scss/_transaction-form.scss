@@ -1,0 +1,748 @@
+@use './_vars.scss' as *;
+
+/* Transaction form layout and styles moved from components/TransactionForm.vue */
+.transaction-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+.form-transaction {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.transaction-date {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  span {
+    font-weight: $font-medium;
+  }
+
+  input {
+    padding: 12px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+    height: 50px;
+    background: $bg-white;
+    color: $text-primary;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+
+  input::placeholder {
+    color: $text-muted;
+  }
+}
+
+.transaction-amount {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+
+  input {
+    width: 100%;
+    height: 50px;
+    border-radius: $radius-lg;
+    padding: 12px;
+    border: 1px solid $border-color;
+    background: $bg-white;
+    color: $text-primary;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+
+  .amount-currency-button {
+    width: 58px;
+    height: 50px;
+    background-color: $bg-light;
+    border-radius: $radius-lg;
+    font-weight: $font-normal;
+    font-size: $font-size-sm;
+    line-height: 100%;
+    border: 1px solid $border-color;
+    cursor: pointer;
+  }
+
+  .amount-currency-select {
+    width: 80px;
+    height: 50px;
+    background-color: $bg-light;
+    border-radius: $radius-lg;
+    font-weight: $font-normal;
+    font-size: $font-size-sm;
+    line-height: 100%;
+    border: 1px solid $border-color;
+    cursor: pointer;
+    padding: 0 8px;
+    appearance: none;
+    color: $text-primary;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+}
+
+.transaction-party {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+
+  span {
+    font-weight: $font-medium;
+  }
+
+  .party-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 12px 40px 12px 36px;
+      height: 50px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 16px;
+      color: $text-primary;
+      background-color: $bg-white;
+
+      &:focus {
+        border-color: $primary;
+        outline: none;
+      }
+    }
+
+    .search-icon,
+    .dropdown-icon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      color: $primary;
+    }
+
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
+  }
+
+  .party-dropdown {
+    position: absolute;
+    top: 85px;
+    width: 100%;
+    background-color: $bg-white;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    list-style: none;
+    padding: 8px 0;
+    z-index: 10;
+
+    li {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
+
+      &:hover {
+        background-color: $bg-light;
+      }
+    }
+  }
+}
+
+.transaction-category {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+
+  span {
+    font-weight: $font-medium;
+  }
+
+  .category-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 12px 40px 12px 36px;
+      height: 50px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 16px;
+      color: $text-primary;
+      background-color: $bg-white;
+
+      &:focus {
+        border-color: $primary;
+        outline: none;
+      }
+    }
+
+    .search-icon,
+    .dropdown-icon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      color: $primary;
+    }
+
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
+  }
+
+  .category-dropdown {
+    position: absolute;
+    top: 85px;
+    width: 100%;
+    background-color: $bg-white;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    list-style: none;
+    padding: 8px 0;
+    z-index: 10;
+
+    li {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
+
+      &:hover {
+        background-color: $bg-light;
+      }
+
+      &.selected-option {
+        background-color: $primary-light;
+        font-weight: $font-medium;
+      }
+      &.disabled {
+        opacity: 0.55;
+        pointer-events: none;
+      }
+    }
+  }
+}
+
+.transaction-wallet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+
+  span {
+    font-weight: $font-medium;
+  }
+
+  .wallet-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 12px 40px 12px 36px;
+      height: 50px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 16px;
+      color: $text-primary;
+      background-color: $bg-white;
+
+      &:focus {
+        border-color: $primary;
+        outline: none;
+      }
+    }
+
+    .search-icon,
+    .dropdown-icon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      color: $primary;
+    }
+
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
+  }
+
+  .wallet-dropdown {
+    position: absolute;
+    top: 85px;
+    width: 100%;
+    background-color: $bg-white;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    list-style: none;
+    padding: 8px 0;
+    z-index: 10;
+
+    li {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
+
+      &:hover {
+        background-color: $bg-light;
+      }
+    }
+  }
+}
+
+.transaction-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  span {
+    font-weight: $font-medium;
+  }
+
+  .upload-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: $bg-white;
+    border: 1px dashed $border-light;
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  #file-input {
+    display: none;
+  }
+
+  .upload-button {
+    display: inline-block;
+    padding: 8px 12px;
+    background: $bg-light;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    color: $text-primary;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .hint {
+    color: $text-muted;
+    font-size: 12px;
+  }
+
+  .file-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: $bg-light;
+    border: 1px solid $border-color;
+    border-radius: 999px;
+    font-size: 12px;
+
+    .remove {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: $text-muted;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+    }
+  }
+
+  .attachment-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .attachment-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 96px;
+    padding: 6px;
+    background: $bg-white;
+    border: 1px solid $border-color;
+    border-radius: 10px;
+    transition: opacity 0.15s ease;
+
+    &.removing {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .thumb {
+      width: 84px;
+      height: 84px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: $bg-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .thumb-placeholder {
+        color: $text-muted;
+        font-size: 20px;
+      }
+    }
+
+    .thumb-doc span {
+      font-weight: $font-medium;
+      font-size: 12px;
+      color: $text-muted;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-size: 11px;
+      color: $text-primary;
+      max-width: 88px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid $border-color;
+      background: $bg-white;
+      color: $text-primary;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+}
+
+.transaction-description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  span {
+    font-weight: $font-medium;
+    margin-bottom: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    border: 1px solid $border-color;
+    background-color: $bg-white;
+    resize: none;
+    color: $text-primary;
+
+    &:focus {
+      border: 1px solid $primary !important;
+      outline: none;
+    }
+    &::placeholder {
+      color: $text-muted;
+    }
+  }
+}
+
+/* Inline error text */
+.error-text {
+  margin-top: 4px;
+  color: $error-color;
+  font-size: $font-size-xs;
+}
+
+.submit-button {
+  align-self: flex-start;
+  margin-top: 16px;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+  }
+
+  &.submit-button--expense {
+    background-color: $error-color;
+    border-color: $error-color;
+
+    &:hover {
+      background-color: $error-dark;
+      border-color: $error-dark;
+    }
+  }
+}
+
+.refund-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  background: $bg-light;
+
+  .refund-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: $font-medium;
+    color: $text-primary;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: $primary;
+    }
+  }
+
+  .refund-hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+    line-height: 1.4;
+  }
+
+  .refund-link {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .refund-link-hint {
+    margin: 4px 0 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}
+
+.recurring-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .recurring-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: $font-medium;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: $primary;
+    }
+  }
+
+  .recurring-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    background: $bg-light;
+  }
+
+  .recurring-select {
+    padding: 12px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+    height: 50px;
+    background: $bg-white;
+    color: $text-primary;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+}
+
+.optional-label {
+  font-weight: $font-normal;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+.intent-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.intent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid $border-color;
+  border-radius: 999px;
+  background: $bg-white;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-medium;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    border-color: $primary;
+    color: $text-primary;
+  }
+
+  .intent-pill-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.intent-pill--active {
+  background: $primary;
+  border-color: $primary;
+  color: white;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.wallet-field-wrapper,
+.group-field-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .wallet-default-indicator,
+  .group-default-indicator {
+    position: absolute;
+    top: 34px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+}

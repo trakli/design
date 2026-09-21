@@ -1,0 +1,811 @@
+<template>
+  <div class="transaction-form">
+    <div class="form">
+      <div class="transaction-date">
+        <span>{{ t('Amount') }}</span>
+        <div class="transaction-amount">
+          <input
+            v-model="formAmount"
+            type="number"
+            :placeholder="t('Ex: 250 000')"
+            min="1"
+            step="any"
+            required
+          />
+          <select
+            v-model="selectedCurrency"
+            class="amount-currency-select"
+            @change="handleCurrencyChange"
+          >
+            <option v-for="currency in availableCurrencies" :key="currency" :value="currency">
+              {{ currency }}
+            </option>
+          </select>
+        </div>
+        <div v-if="amountError" class="error-text">
+          {{ t('Enter a valid amount greater than 0.') }}
+        </div>
+      </div>
+
+      <div class="transaction-description">
+        <span
+          >{{ t('Description') }} <span class="optional-label">({{ t('optional') }})</span></span
+        >
+        <textarea v-model="formDescription" :placeholder="t('Type here...')" />
+      </div>
+
+      <div class="transaction-date">
+        <span
+          >{{ t('Intent') }} <span class="optional-label">({{ t('optional') }})</span></span
+        >
+        <div class="intent-pills" role="radiogroup" :aria-label="t('Intent')">
+          <TButton
+            v-for="opt in intentOptions"
+            :key="opt.value"
+            variant="text"
+            size="small"
+            :full-width="false"
+            class="intent-pill"
+            :class="{ 'intent-pill--active': formIntent === opt.value }"
+            role="radio"
+            :aria-checked="formIntent === opt.value"
+            @click="formIntent = opt.value"
+          >
+            <component :is="intentIcons[opt.value]" class="intent-pill-icon" />
+            <span>{{ t(opt.label) }}</span>
+          </TButton>
+        </div>
+      </div>
+
+      <div class="form-transaction">
+        <div class="transaction-date">
+          <span>{{ t('Transaction date') }}</span>
+          <input v-model="formDate" type="date" required />
+          <div v-if="dateError" class="error-text">{{ t('Date is required.') }}</div>
+        </div>
+
+        <div class="transaction-date">
+          <span>{{ t('Transaction time') }}</span>
+          <input v-model="formTime" type="time" required />
+          <div v-if="timeError" class="error-text">{{ t('Time is required.') }}</div>
+        </div>
+      </div>
+
+      <div class="form-transaction">
+        <SearchableDropdown
+          v-model="searchQuery"
+          :label="isOutcomeSelected ? t('Party (sent to)') : t('Party (received from)')"
+          :placeholder="t('Search party...')"
+          :options="parties"
+          @select="handlePartySelect"
+        />
+
+        <div class="wallet-field-wrapper">
+          <SearchableDropdown
+            v-model="walletSearchQuery"
+            :label="isOutcomeSelected ? t('Wallet (sent from)') : t('Wallet (received to)')"
+            :placeholder="t('Search wallet...')"
+            :options="wallets"
+            :error="walletError ? t('Wallet is required.') : ''"
+            @select="handleWalletSelect"
+            @clear="selectedWalletId = null"
+          />
+          <span
+            v-if="isWalletDefault"
+            class="wallet-default-indicator"
+            :title="t('This is your default wallet')"
+          >
+            {{ t('Default') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-transaction">
+        <div class="group-field-wrapper">
+          <SearchableDropdown
+            v-model="groupSearchQuery"
+            :label="t('Group')"
+            :placeholder="t('Search group...')"
+            :options="groups"
+            :error="categoryError ? t('Group is required.') : ''"
+            @select="handleGroupSelect"
+            @clear="selectedGroupId = null"
+          />
+          <span
+            v-if="isGroupDefault"
+            class="group-default-indicator"
+            :title="t('This is your default group')"
+          >
+            {{ t('Default') }}
+          </span>
+        </div>
+
+        <SearchableDropdown
+          v-model="categorySearchQuery"
+          :label="t('Categories')"
+          :placeholder="t('Search categories...')"
+          :options="categories"
+          :multiple="true"
+          :selected="selectedAdditionalCategoryIds"
+          @select="handleCategorySelect"
+        />
+      </div>
+
+      <div class="transaction-files">
+        <span>{{ t('Attachments') }}</span>
+
+        <div v-if="existingAttachments.length" class="attachment-grid">
+          <div
+            v-for="file in existingAttachments"
+            :key="`existing-${file.id}`"
+            class="attachment-card"
+            :class="{ removing: removingFileIds.has(file.id) }"
+          >
+            <div v-if="isImageAttachment(file)" class="thumb">
+              <img
+                v-if="existingPreviews[file.id]"
+                :src="existingPreviews[file.id]"
+                :alt="t('Attachment')"
+              />
+              <div v-else class="thumb-placeholder">…</div>
+            </div>
+            <div v-else class="thumb thumb-doc">
+              <span>{{ extensionLabel(file.path) }}</span>
+            </div>
+            <TButton
+              variant="text"
+              size="small"
+              :full-width="false"
+              class="remove"
+              :disabled="removingFileIds.has(file.id)"
+              :title="t('Remove')"
+              @click="removeExistingAttachment(file)"
+            >
+              ×
+            </TButton>
+          </div>
+        </div>
+
+        <div class="upload-box">
+          <input id="file-input" type="file" multiple @change="onFilesSelected" />
+          <label for="file-input" class="upload-button">{{ t('Browse files') }}</label>
+          <span class="hint">{{ t('Images, PDFs or docs. Max 5 files.') }}</span>
+        </div>
+
+        <div v-if="newAttachments.length" class="attachment-grid">
+          <div
+            v-for="(att, i) in newAttachments"
+            :key="`new-${att.name}-${i}`"
+            class="attachment-card"
+          >
+            <div v-if="att.isImage && att.previewUrl" class="thumb">
+              <img :src="att.previewUrl" :alt="att.name" />
+            </div>
+            <div v-else class="thumb thumb-doc">
+              <span>{{ extensionLabel(att.name) }}</span>
+            </div>
+            <span class="filename">{{ att.name }}</span>
+            <TButton
+              variant="text"
+              size="small"
+              :full-width="false"
+              class="remove"
+              :title="t('Remove')"
+              @click="removeNewAttachment(i)"
+            >
+              ×
+            </TButton>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="!isOutcomeSelected" class="refund-section">
+        <label class="refund-toggle">
+          <input v-model="formIsRefund" type="checkbox" />
+          <span>{{ t('This is a refund') }}</span>
+        </label>
+        <p class="refund-hint">
+          {{
+            t('Mark this income as refunding a past expense. Budgets subtract it from their spend.')
+          }}
+        </p>
+        <div v-if="formIsRefund" class="refund-link">
+          <SearchableDropdown
+            v-model="refundPickerQuery"
+            :label="t('Refund of')"
+            :placeholder="
+              recentExpenses.length ? t('Search expenses...') : t('Loading expenses...')
+            "
+            :options="refundOptions"
+            @select="handleRefundSelect"
+            @clear="formRefundOfTransactionId = null"
+          />
+          <p class="refund-link-hint">
+            {{ t('Leave blank to mark the refund without linking to a specific expense.') }}
+          </p>
+        </div>
+      </div>
+
+      <div class="recurring-section">
+        <label class="recurring-toggle">
+          <input v-model="formIsRecurring" type="checkbox" />
+          <span>{{ t('Make recurring') }}</span>
+        </label>
+        <div v-if="formIsRecurring" class="recurring-fields">
+          <div class="form-transaction">
+            <div class="transaction-date">
+              <span>{{ t('Recurrence period') }}</span>
+              <select v-model="formRecurrencePeriod" class="recurring-select">
+                <option value="daily">{{ t('Daily') }}</option>
+                <option value="weekly">{{ t('Weekly') }}</option>
+                <option value="monthly">{{ t('Monthly') }}</option>
+                <option value="yearly">{{ t('Yearly') }}</option>
+              </select>
+            </div>
+            <div class="transaction-date">
+              <span>{{ t('Repeat every') }}</span>
+              <input v-model="formRecurrenceInterval" type="number" min="1" />
+            </div>
+          </div>
+          <div class="transaction-date">
+            <span
+              >{{ t('End date') }} <span class="optional-label">({{ t('optional') }})</span></span
+            >
+            <input v-model="formRecurrenceEndsAt" type="date" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <TButton
+      :text="
+        props.editingItem
+          ? isOutcomeSelected
+            ? t('Update expense')
+            : t('Update income')
+          : isOutcomeSelected
+            ? t('Record expense')
+            : t('Record income')
+      "
+      class="submit-button"
+      :class="{ 'submit-button--expense': isOutcomeSelected }"
+      :disabled="props.isSubmitting"
+      :loading="props.isSubmitting"
+      @click="onSubmit"
+    >
+      <template #left-icon>
+        <CheckIcon v-if="!props.editingItem" />
+        <PencilIcon v-else />
+      </template>
+    </TButton>
+  </div>
+</template>
+
+<script setup>
+import { toRefs, ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import TButton from './TButton.vue';
+import SearchableDropdown from './SearchableDropdown.vue';
+import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
+import {
+  Circle,
+  HandCoins,
+  Banknote,
+  Scale,
+  Handshake,
+  TrendingUp,
+  PiggyBank,
+  Gift
+} from 'lucide-vue-next';
+
+const i18n = typeof useI18n === 'function' ? useI18n() : null;
+const t = i18n?.t || ((k) => k);
+
+const TRANSACTION_INTENT_OPTIONS = [
+  { value: 'regular', label: 'Regular', side: 'both' },
+  { value: 'loan_received', label: 'Loan received', side: 'income' },
+  { value: 'loan_repayment', label: 'Loan repayment', side: 'expense' },
+  { value: 'debt_owed', label: 'Debt owed', side: 'income' },
+  { value: 'debt_settled', label: 'Debt settled', side: 'expense' },
+  { value: 'investment_buy', label: 'Investment purchase', side: 'expense' },
+  { value: 'investment_return', label: 'Investment return', side: 'income' },
+  { value: 'gift', label: 'Gift', side: 'income' }
+];
+
+const emit = defineEmits(['submit', 'error']);
+
+const props = defineProps({
+  isOutcomeSelected: {
+    type: Boolean,
+    default: false
+  },
+  editingItem: {
+    type: Object,
+    default: null
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
+  },
+  parties: { type: Array, default: () => [] },
+  wallets: { type: Array, default: () => [] },
+  groups: { type: Array, default: () => [] },
+  incomeCategories: { type: Array, default: () => [] },
+  expenseCategories: { type: Array, default: () => [] },
+  defaultCurrency: { type: String, default: 'USD' },
+  defaultGroup: { type: Object, default: null },
+  defaultWallet: { type: Object, default: null },
+  fetchFileBlob: { type: Function, default: null },
+  deleteFile: { type: Function, default: null },
+  fetchRecentExpenses: { type: Function, default: null }
+});
+
+const { isOutcomeSelected } = toRefs(props);
+
+const formatWalletName = (wallet) =>
+  wallet.currency ? `${wallet.name} (${wallet.currency})` : wallet.name;
+
+const now = new Date();
+const formDate = ref(now.toISOString().slice(0, 10));
+const formTime = ref(now.toTimeString().slice(0, 5));
+const formAmount = ref('');
+const formParty = ref('');
+const formCategory = ref('');
+const formDescription = ref('');
+const formIntent = ref('regular');
+
+const intentIcons = {
+  regular: Circle,
+  loan_received: HandCoins,
+  loan_repayment: Banknote,
+  debt_owed: Scale,
+  debt_settled: Handshake,
+  investment_buy: TrendingUp,
+  investment_return: PiggyBank,
+  gift: Gift
+};
+
+const intentOptions = computed(() => {
+  const side = isOutcomeSelected.value ? 'expense' : 'income';
+  return TRANSACTION_INTENT_OPTIONS.filter((o) => o.side === 'both' || o.side === side);
+});
+
+const selectedPartyId = ref(null);
+const selectedWalletId = ref(null);
+const selectedGroupId = ref(null);
+const selectedAdditionalCategoryIds = ref([]);
+
+const MAX_ATTACHMENTS = 5;
+
+const newAttachments = ref([]);
+const existingAttachments = ref([]);
+const existingPreviews = ref({});
+const loadingPreviewIds = ref(new Set());
+const removingFileIds = ref(new Set());
+const formIsRecurring = ref(false);
+const formRecurrencePeriod = ref('monthly');
+const formRecurrenceInterval = ref(1);
+const formRecurrenceEndsAt = ref('');
+const formIsRefund = ref(false);
+const formRefundOfTransactionId = ref(null);
+const recentExpenses = ref([]);
+const refundPickerQuery = ref('');
+let recentExpensesLoaded = false;
+const selectedCurrency = ref(props.defaultCurrency || 'USD');
+
+const dateError = ref(false);
+const timeError = ref(false);
+const amountError = ref(false);
+const partyError = ref(false);
+const categoryError = ref(false);
+const walletError = ref(false);
+
+function validateRequiredFields() {
+  let valid = true;
+
+  const amountNum = Number(formAmount.value);
+  amountError.value = !Number.isFinite(amountNum) || amountNum <= 0;
+  if (amountError.value) valid = false;
+
+  dateError.value = !formDate.value || formDate.value.trim() === '';
+  timeError.value = !formTime.value || formTime.value.trim() === '';
+  if (dateError.value || timeError.value) valid = false;
+
+  partyError.value = false;
+  categoryError.value = false;
+  walletError.value = false;
+
+  const partyValue = (formParty.value || searchQuery.value || '').trim();
+  if (partyValue) formParty.value = partyValue;
+
+  return valid;
+}
+
+function onSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
+  const isValid = validateRequiredFields();
+  if (!isValid) {
+    return;
+  }
+
+  const date = formDate.value || now.toISOString().slice(0, 10);
+  const time = formTime.value || now.toTimeString().slice(0, 5);
+
+  const amountNum = Number(formAmount.value);
+
+  const payload = {
+    date,
+    time,
+    type: isOutcomeSelected.value ? 'EXPENSE' : 'INCOME',
+    intent: formIntent.value,
+    party: formParty.value,
+    partyId: selectedPartyId.value,
+    amount: `${amountNum} ${selectedCurrency.value}`,
+    category: formCategory.value,
+    categoryIds: selectedAdditionalCategoryIds.value,
+    groupId: selectedGroupId.value ?? undefined,
+    walletId: selectedWalletId.value,
+    description: formDescription.value.trim(),
+    filesToUpload: newAttachments.value.map((att) => att.file),
+    isRecurring: formIsRecurring.value,
+    recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
+    recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
+    recurrenceEndsAt:
+      formIsRecurring.value && formRecurrenceEndsAt.value ? formRecurrenceEndsAt.value : undefined,
+    isRefund: !isOutcomeSelected.value && formIsRefund.value,
+    refundOfTransactionId:
+      !isOutcomeSelected.value && formIsRefund.value ? formRefundOfTransactionId.value : null
+  };
+
+  if (props.editingItem?.id) {
+    payload.id = props.editingItem.id;
+  }
+
+  emit('submit', payload);
+}
+
+const parties = computed(() => props.parties);
+const groups = computed(() => props.groups);
+const categories = computed(() =>
+  isOutcomeSelected.value ? props.expenseCategories : props.incomeCategories
+);
+
+const availableCurrencies = computed(() => {
+  const currencies = new Set(['XAF', 'USD', 'EUR', 'GBP', 'NGN']);
+  props.wallets.forEach((wallet) => {
+    if (wallet.currency) {
+      currencies.add(wallet.currency);
+    }
+  });
+  return Array.from(currencies).sort();
+});
+
+const wallets = computed(() =>
+  props.wallets
+    .filter((wallet) => !wallet.currency || wallet.currency === selectedCurrency.value)
+    .map((w) => ({ ...w, name: formatWalletName(w), originalName: w.name }))
+);
+
+const isWalletDefault = computed(() => {
+  if (!selectedWalletId.value) return false;
+  const dw = props.defaultWallet;
+  if (!dw) return false;
+  return selectedWalletId.value === dw.id;
+});
+
+const isGroupDefault = computed(() => {
+  if (!selectedGroupId.value) return false;
+  const dg = props.defaultGroup;
+  if (!dg) return false;
+  return selectedGroupId.value === dg.id;
+});
+
+function handlePartySelect(party) {
+  formParty.value = party.name;
+  selectedPartyId.value = party.id;
+  partyError.value = false;
+}
+
+function handleWalletSelect(wallet) {
+  selectedWalletId.value = wallet.id;
+  walletError.value = false;
+
+  if (wallet.currency && wallet.currency !== selectedCurrency.value) {
+    selectedCurrency.value = wallet.currency;
+  }
+}
+
+function handleCurrencyChange() {
+  if (selectedWalletId.value) {
+    const currentWallet = props.wallets.find((w) => w.id === selectedWalletId.value);
+
+    if (
+      currentWallet &&
+      currentWallet.currency &&
+      currentWallet.currency !== selectedCurrency.value
+    ) {
+      selectedWalletId.value = null;
+      walletSearchQuery.value = '';
+
+      const dw = props.defaultWallet;
+      if (dw) {
+        selectedWalletId.value = dw.id;
+        walletSearchQuery.value = dw.name;
+      }
+    }
+  }
+}
+
+function handleGroupSelect(group) {
+  selectedGroupId.value = group.id;
+  formCategory.value = group.name;
+  categoryError.value = false;
+}
+
+const searchQuery = ref('');
+const groupSearchQuery = ref('');
+const categorySearchQuery = ref('');
+const walletSearchQuery = ref('');
+
+function handleCategorySelect(categoryIds) {
+  selectedAdditionalCategoryIds.value = categoryIds;
+}
+
+async function loadRecentExpenses() {
+  if (recentExpensesLoaded) return;
+  try {
+    const data = props.fetchRecentExpenses ? await props.fetchRecentExpenses() : [];
+    recentExpenses.value = data || [];
+    recentExpensesLoaded = true;
+  } catch (e) {
+    console.error('[TransactionForm] Failed to load recent expenses', e);
+  }
+}
+
+function formatExpenseOption(exp) {
+  const dt = exp.datetime ? new Date(exp.datetime) : null;
+  const date = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString() : '';
+  const amount = Number(exp.amount || 0).toFixed(2);
+  const currency = exp.wallet?.currency ?? '';
+  const desc = exp.description || exp.party?.name || t('Untitled transaction');
+  return `${date} · ${amount} ${currency} · ${desc}`.trim();
+}
+
+const refundOptions = computed(() =>
+  recentExpenses.value.map((exp) => ({
+    id: Number(exp.id),
+    name: formatExpenseOption(exp)
+  }))
+);
+
+function handleRefundSelect(option) {
+  formRefundOfTransactionId.value = option?.id ?? null;
+  refundPickerQuery.value = option?.name ?? '';
+}
+
+watch(formIsRefund, (flag) => {
+  if (flag) {
+    loadRecentExpenses();
+  } else {
+    formRefundOfTransactionId.value = null;
+    refundPickerQuery.value = '';
+  }
+});
+
+watch(isOutcomeSelected, (isExpense) => {
+  if (isExpense) {
+    formIsRefund.value = false;
+    formRefundOfTransactionId.value = null;
+  }
+  if (!intentOptions.value.some((o) => o.value === formIntent.value)) {
+    formIntent.value = 'regular';
+  }
+});
+
+onMounted(() => {
+  if (!props.editingItem) {
+    const dg = props.defaultGroup;
+    if (dg && !selectedGroupId.value) {
+      selectedGroupId.value = dg.id;
+      formCategory.value = dg.name;
+      groupSearchQuery.value = dg.name;
+    }
+
+    const dw = props.defaultWallet;
+    if (dw && !selectedWalletId.value) {
+      selectedWalletId.value = dw.id;
+      walletSearchQuery.value = dw.name;
+      if (dw.currency) {
+        selectedCurrency.value = dw.currency;
+      }
+    }
+  }
+});
+
+function isImageMime(file) {
+  return typeof file.type === 'string' && file.type.startsWith('image/');
+}
+
+function isImageAttachment(file) {
+  return file.type === 'image';
+}
+
+function extensionLabel(name) {
+  const cleaned = (name || '').split('?')[0].split('#')[0];
+  const ext = cleaned.split('.').pop();
+  return (ext && ext !== cleaned ? ext : 'FILE').toUpperCase().slice(0, 4);
+}
+
+function revokeNewPreviews() {
+  for (const att of newAttachments.value) {
+    if (att.previewUrl) URL.revokeObjectURL(att.previewUrl);
+  }
+}
+
+function revokeExistingPreviews() {
+  for (const url of Object.values(existingPreviews.value)) {
+    URL.revokeObjectURL(url);
+  }
+  existingPreviews.value = {};
+}
+
+function onFilesSelected(event) {
+  const input = event.target;
+  const files = input.files;
+  if (!files) return;
+  const remaining =
+    MAX_ATTACHMENTS - (newAttachments.value.length + existingAttachments.value.length);
+  for (const file of Array.from(files).slice(0, Math.max(0, remaining))) {
+    newAttachments.value.push({
+      file,
+      name: file.name,
+      size: file.size,
+      isImage: isImageMime(file),
+      previewUrl: isImageMime(file) ? URL.createObjectURL(file) : null
+    });
+  }
+  // Reset the input so picking the same file again still emits a change event.
+  input.value = '';
+}
+
+function removeNewAttachment(index) {
+  const att = newAttachments.value[index];
+  if (att?.previewUrl) URL.revokeObjectURL(att.previewUrl);
+  newAttachments.value.splice(index, 1);
+}
+
+async function loadExistingPreview(file) {
+  if (file.type !== 'image') return;
+  if (existingPreviews.value[file.id]) return;
+  if (loadingPreviewIds.value.has(file.id)) return;
+  loadingPreviewIds.value.add(file.id);
+  try {
+    const blob = props.fetchFileBlob ? await props.fetchFileBlob(file.id) : null;
+    if (blob) existingPreviews.value[file.id] = URL.createObjectURL(blob);
+  } catch (err) {
+    console.error('[TransactionForm] Failed to load attachment preview', err);
+  } finally {
+    loadingPreviewIds.value.delete(file.id);
+  }
+}
+
+async function removeExistingAttachment(file) {
+  const transactionId = props.editingItem?.id;
+  if (!transactionId) return;
+  if (removingFileIds.value.has(file.id)) return;
+  removingFileIds.value.add(file.id);
+  try {
+    if (props.deleteFile) await props.deleteFile(Number(transactionId), file.id);
+    existingAttachments.value = existingAttachments.value.filter((f) => f.id !== file.id);
+    const url = existingPreviews.value[file.id];
+    if (url) {
+      URL.revokeObjectURL(url);
+      const { [file.id]: _removed, ...rest } = existingPreviews.value;
+      existingPreviews.value = rest;
+    }
+  } catch (err) {
+    console.error('[TransactionForm] Failed to remove attachment', err);
+    emit('error', err);
+  } finally {
+    removingFileIds.value.delete(file.id);
+  }
+}
+
+onUnmounted(() => {
+  revokeNewPreviews();
+  revokeExistingPreviews();
+});
+
+watch(
+  () => props.editingItem,
+  async (item) => {
+    if (!item) return;
+
+    dateError.value = false;
+    timeError.value = false;
+    amountError.value = false;
+    partyError.value = false;
+    categoryError.value = false;
+
+    if (item.date) formDate.value = item.date;
+    if (item.time) formTime.value = item.time;
+
+    if (item.party) {
+      formParty.value = item.party;
+      searchQuery.value = item.party;
+    }
+    if (item.partyId) {
+      selectedPartyId.value = item.partyId;
+    }
+
+    if (item.groupId) {
+      selectedGroupId.value = item.groupId;
+      const group = props.groups.find((g) => g.id === item.groupId);
+      if (group) {
+        formCategory.value = group.name;
+        groupSearchQuery.value = group.name;
+      }
+    }
+
+    if (item.categoryIds && item.categoryIds.length > 0) {
+      selectedAdditionalCategoryIds.value = item.categoryIds;
+    }
+
+    if (item.walletId) {
+      selectedWalletId.value = item.walletId;
+      const wallet = props.wallets.find((w) => w.id === item.walletId);
+      if (wallet) {
+        walletSearchQuery.value = wallet.name;
+        if (wallet.currency) {
+          selectedCurrency.value = wallet.currency;
+        }
+      }
+    }
+
+    if (item.description) {
+      formDescription.value = item.description;
+    }
+
+    formIntent.value = item.intent || 'regular';
+
+    if (item.amount) {
+      const num = parseFloat(String(item.amount).replace(/[^\d.]/g, ''));
+      formAmount.value = Number.isFinite(num) ? String(num) : '';
+    }
+
+    if (item.isRecurring) {
+      formIsRecurring.value = true;
+      formRecurrencePeriod.value = item.recurrencePeriod || 'monthly';
+      formRecurrenceInterval.value = item.recurrenceInterval || 1;
+      formRecurrenceEndsAt.value = item.recurrenceEndsAt ? item.recurrenceEndsAt.split('T')[0] : '';
+    }
+
+    if (item.isRefund) {
+      formIsRefund.value = true;
+      formRefundOfTransactionId.value = item.refundOfTransactionId ?? null;
+      await loadRecentExpenses();
+      if (formRefundOfTransactionId.value) {
+        const match = recentExpenses.value.find(
+          (exp) => Number(exp.id) === formRefundOfTransactionId.value
+        );
+        if (match) refundPickerQuery.value = formatExpenseOption(match);
+      }
+    }
+
+    revokeExistingPreviews();
+    existingAttachments.value = Array.isArray(item.files) ? [...item.files] : [];
+    for (const file of existingAttachments.value) {
+      loadExistingPreview(file);
+    }
+  },
+  { immediate: true }
+);
+</script>
+
+<style lang="scss" scoped>
+@use '../assets/scss/_vars.scss' as *;
+@use '../assets/scss/_transaction-form.scss' as *;
+</style>
+
+
